@@ -1,0 +1,38 @@
+﻿# Credentials and secrets
+.env
+.env.*
+!.env.example
+service-account-*.json
+*-key.json
+*.pem
+
+# Local data and generated outputs
+data/
+outputs/
+!outputs/.gitkeep
+
+# Python cache and test artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE and OS local files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+# Local governance documents - not public repository deliverables
+docs/00_project_control/MANUAL_DE_FUNCIONES_v2.md
+docs/00_project_control/MANUAL_OPERATIVO_v4.md
+docs/00_project_control/SDD_CONTRACT_v3.md
