@@ -1,0 +1,22 @@
+name: Default Branch Workflow Dispatch Prerequisite
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch-prerequisite:
+    name: Register workflow_dispatch on default branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm default-branch workflow registration only
+        run: |
+          echo "This workflow exists only to register workflow_dispatch on the default branch."
+          echo "The full E2E pipeline is executed from release/e2e-validation."
+          echo "No GCP authentication is performed."
+          echo "No extraction is performed."
+          echo "No loading is performed."
+          echo "No SQL execution is performed."
+          echo "No data mutation is performed."
