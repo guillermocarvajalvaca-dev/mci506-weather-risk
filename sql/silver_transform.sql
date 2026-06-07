@@ -4,18 +4,18 @@
 -- LAYER: Silver - BigQuery
 -- PURPOSE:
 --   Transform raw Open-Meteo JSON payloads from
---   mci506-weather-risk.silver.raw_weather_json
+--   `mci506-weather-risk.silver.raw_weather_json`
 --   into typed, deduplicated Silver tables.
 --
 -- CONTRACT:
 --   Bronze raw files live in GCS.
 --   BigQuery reads staged raw JSON from:
---     mci506-weather-risk.silver.raw_weather_json
+--     `mci506-weather-risk.silver.raw_weather_json`
 --   This script creates and populates:
---     mci506-weather-risk.silver.cities_dim
---     mci506-weather-risk.silver.weathercode_dim
---     mci506-weather-risk.silver.daily_weather_clean
---     mci506-weather-risk.silver.quarantine_log
+--     `mci506-weather-risk.silver.cities_dim`
+--     `mci506-weather-risk.silver.weathercode_dim`
+--     `mci506-weather-risk.silver.daily_weather_clean`
+--     `mci506-weather-risk.silver.quarantine_log`
 --
 -- EXECUTION:
 --   Run in BigQuery Standard SQL as a script.
@@ -24,7 +24,7 @@
 --   This file creates Silver tables only.
 --   Gold tables must be implemented in a separate PR.
 
-CREATE OR REPLACE TABLE mci506-weather-risk.silver.cities_dim AS
+CREATE OR REPLACE TABLE `mci506-weather-risk.silver.cities_dim` AS
 SELECT 'santa_cruz' AS city_id, 'Santa Cruz de la Sierra' AS city_name, -17.7833 AS latitude, -63.1833 AS longitude, 416 AS elevation_m, 'Santa Cruz' AS department, 'Lowlands' AS region
 UNION ALL SELECT 'la_paz', 'La Paz', -16.5000, -68.1500, 3640, 'La Paz', 'Altiplano'
 UNION ALL SELECT 'cochabamba', 'Cochabamba', -17.3895, -66.1568, 2558, 'Cochabamba', 'Valleys'
@@ -32,7 +32,7 @@ UNION ALL SELECT 'sucre', 'Sucre', -19.0431, -65.2591, 2810, 'Chuquisaca', 'Vall
 UNION ALL SELECT 'oruro', 'Oruro', -17.9833, -67.1500, 3706, 'Oruro', 'Altiplano'
 UNION ALL SELECT 'tarija', 'Tarija', -21.5353, -64.7298, 1866, 'Tarija', 'Valleys';
 
-CREATE OR REPLACE TABLE mci506-weather-risk.silver.weathercode_dim AS
+CREATE OR REPLACE TABLE `mci506-weather-risk.silver.weathercode_dim` AS
 SELECT 0 AS weathercode, 'Clear sky' AS weather_description
 UNION ALL SELECT 1, 'Mainly clear'
 UNION ALL SELECT 2, 'Partly cloudy'
@@ -55,7 +55,7 @@ UNION ALL SELECT 95, 'Thunderstorm'
 UNION ALL SELECT 96, 'Thunderstorm with slight hail'
 UNION ALL SELECT 99, 'Thunderstorm with heavy hail';
 
-CREATE TABLE IF NOT EXISTS mci506-weather-risk.silver.daily_weather_clean (
+CREATE TABLE IF NOT EXISTS `mci506-weather-risk.silver.daily_weather_clean` (
     city_id STRING NOT NULL,
     city_name STRING NOT NULL,
     date DATE NOT NULL,
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS mci506-weather-risk.silver.daily_weather_clean (
     loaded_at_utc TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS mci506-weather-risk.silver.quarantine_log (
+CREATE TABLE IF NOT EXISTS `mci506-weather-risk.silver.quarantine_log` (
     city_id STRING,
     city_name STRING,
     date DATE,
@@ -106,7 +106,7 @@ WITH expanded_raw AS (
         SAFE_CAST(JSON_VALUE_ARRAY(payload, '$.data.daily.et0_fao_evapotranspiration')[SAFE_OFFSET(idx)] AS FLOAT64) AS et0_fao_evapotranspiration,
         extraction_timestamp_utc,
         '$.data.daily' AS payload_source
-    FROM mci506-weather-risk.silver.raw_weather_json AS raw
+    FROM `mci506-weather-risk.silver.raw_weather_json` AS raw
     CROSS JOIN UNNEST(JSON_QUERY_ARRAY(payload, '$.data.daily.time')) AS day_value WITH OFFSET AS idx
 ),
 typed_rows AS (
@@ -137,7 +137,7 @@ typed_rows AS (
 SELECT *
 FROM typed_rows;
 
-INSERT INTO mci506-weather-risk.silver.daily_weather_clean (
+INSERT INTO `mci506-weather-risk.silver.daily_weather_clean` (
     city_id,
     city_name,
     date,
@@ -181,12 +181,12 @@ WHERE p.city_id IS NOT NULL
   AND COALESCE(p.windspeed_10m_max, 0) >= 0
   AND NOT EXISTS (
       SELECT 1
-      FROM mci506-weather-risk.silver.daily_weather_clean AS existing
+      FROM `mci506-weather-risk.silver.daily_weather_clean` AS existing
       WHERE existing.city_id = p.city_id
         AND existing.date = p.date
   );
 
-INSERT INTO mci506-weather-risk.silver.quarantine_log (
+INSERT INTO `mci506-weather-risk.silver.quarantine_log` (
     city_id,
     city_name,
     date,
