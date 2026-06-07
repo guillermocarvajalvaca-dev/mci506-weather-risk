@@ -10,12 +10,12 @@
 --
 -- Source layer:
 --   BigQuery Silver tables:
---   mci506-weather-risk.silver.daily_weather_clean
---   mci506-weather-risk.silver.cities_dim
+--   `mci506-weather-risk.silver.daily_weather_clean`
+--   `mci506-weather-risk.silver.cities_dim`
 --
 -- Target layer:
 --   BigQuery Gold table:
---   mci506-weather-risk.gold.daily_risk_index_by_city
+--   `mci506-weather-risk.gold.daily_risk_index_by_city`
 --
 -- Risk model:
 --   composite_risk_score =
@@ -33,9 +33,9 @@
 --   This SQL file is implementation-only. It must be reviewed by Guillermo
 --   before pull request integration and must not be executed directly from this branch.
 
-CREATE SCHEMA IF NOT EXISTS mci506-weather-risk.gold;
+CREATE SCHEMA IF NOT EXISTS `mci506-weather-risk.gold`;
 
-CREATE OR REPLACE TABLE mci506-weather-risk.gold.daily_risk_index_by_city AS
+CREATE OR REPLACE TABLE `mci506-weather-risk.gold.daily_risk_index_by_city` AS
 WITH base_weather AS (
     SELECT
         dwc.city_id,
@@ -49,8 +49,8 @@ WITH base_weather AS (
         ) AS temperature_reference_c,
         dwc.precipitation_sum,
         dwc.windspeed_10m_max
-    FROM mci506-weather-risk.silver.daily_weather_clean AS dwc
-    INNER JOIN mci506-weather-risk.silver.cities_dim AS cd
+    FROM `mci506-weather-risk.silver.daily_weather_clean` AS dwc
+    INNER JOIN `mci506-weather-risk.silver.cities_dim` AS cd
         ON dwc.city_id = cd.city_id
 ),
 
